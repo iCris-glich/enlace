@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "685909948501",
+    "project_id": "enlace-original",
+    "storage_bucket": "enlace-original.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:685909948501:android:ead6496796f13ebd3dbcdc",
+        "android_client_info": {
+          "package_name": "com.example.enlace"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyACXeBFD34FlGmfQyFPssgUbddrtncBpsI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

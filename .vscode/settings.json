@@ -1,0 +1,7 @@
+{
+    "java.configuration.updateBuildConfiguration": "interactive",
+    "window.density.editorTabHeight": "compact",
+    "workbench.editor.autoLockGroups": {
+        "imagePreview.previewEditor": true
+    }
+}
