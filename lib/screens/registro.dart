@@ -187,7 +187,7 @@ class Estado extends State<Registro> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xffE0F7FA),
+      backgroundColor: const Color.fromARGB(255, 249, 249, 249),
       body: PageView(
         children: [
           _buildPrimeraPantalla(),
