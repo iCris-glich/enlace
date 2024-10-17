@@ -14,6 +14,9 @@ class Editar extends StatefulWidget {
 class _EditarState extends State<Editar> {
   final TextEditingController nombreController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
+  final TextEditingController apellidoController = TextEditingController();
+  final TextEditingController usuarioController = TextEditingController();
+
   File? imagenSeleccionada;
   final ImagePicker _picker = ImagePicker();
 
@@ -29,8 +32,11 @@ class _EditarState extends State<Editar> {
     usuario = FirebaseAuth.instance.currentUser;
 
     if (usuario != null) {
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('usuarios').doc(usuario!.uid).get();
-      
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('usuarios')
+          .doc(usuario!.uid)
+          .get();
+
       if (userDoc.exists) {
         setState(() {
           nombreController.text = userDoc['nombreUsuario'] ?? '';
@@ -50,15 +56,42 @@ class _EditarState extends State<Editar> {
           urlImagen = await subirImagenAStorage(imagenSeleccionada!);
         }
 
-        await FirebaseFirestore.instance.collection('usuarios').doc(usuario!.uid).update({
-          'nombre': nombreController.text,
-          'email': emailController.text,
-          'imagenPerfil': urlImagen ?? '', // Actualizar la URL de la imagen
-        });
+        DocumentSnapshot userDoc = await FirebaseFirestore.instance
+            .collection('usuarios')
+            .doc(usuario!.uid)
+            .get();
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Datos actualizados con éxito')),
-        );
+        if (userDoc.exists) {
+          await FirebaseFirestore.instance
+              .collection('usuarios')
+              .doc(usuario!.uid)
+              .update({
+            'nombre': nombreController.text,
+            'apellido': apellidoController.text, // Añadido
+            'nombreUsuario': usuarioController.text, // Añadido
+            'email': emailController.text,
+            'imagenPerfil': urlImagen ?? '', // Actualizar la URL de la imagen
+          });
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Datos actualizados con éxito')),
+          );
+        } else {
+          await FirebaseFirestore.instance
+              .collection('usuarios')
+              .doc(usuario!.uid)
+              .set({
+            'nombre': nombreController.text,
+            'apellido': apellidoController.text, // Añadido
+            'nombreUsuario': usuarioController.text, // Añadido
+            'email': emailController.text,
+            'imagenPerfil': urlImagen ?? '',
+          });
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Usuario creado con éxito')),
+          );
+        }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Error al actualizar los datos')),
@@ -89,42 +122,58 @@ class _EditarState extends State<Editar> {
       appBar: AppBar(
         title: const Text('Editar Datos'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(15.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: nombreController,
-              decoration: const InputDecoration(
-                labelText: 'Nombre',
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(15.0),
+          child: Column(
+            children: [
+              TextField(
+                controller: nombreController,
+                decoration: const InputDecoration(
+                  labelText: 'Nombre',
+                ),
               ),
-            ),
-            TextField(
-              controller: emailController,
-              decoration: const InputDecoration(
-                labelText: 'Email',
+              TextField(
+                controller: apellidoController,
+                decoration: const InputDecoration(
+                  labelText: 'Apellido',
+                ),
               ),
-              keyboardType: TextInputType.emailAddress,
-            ),
-            const SizedBox(height: 20),
-            imagenSeleccionada != null
-                ? Image.file(imagenSeleccionada!, height: 150)
-                : const Text('No se ha seleccionado ninguna imagen'),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () => seleccionarImagen(ImageSource.gallery),
-              child: const Text('Seleccionar Imagen de la Galería'),
-            ),
-            ElevatedButton(
-              onPressed: () => seleccionarImagen(ImageSource.camera),
-              child: const Text('Tomar Foto con la Cámara'),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: actualizarDatosUsuario,
-              child: const Text('Guardar Cambios'),
-            ),
-          ],
+              TextField(
+                controller: usuarioController,
+                decoration: const InputDecoration(
+                  labelText: 'Usuario',
+                ),
+              ),
+              TextField(
+                controller: emailController,
+                decoration: const InputDecoration(
+                  labelText: 'Email',
+                ),
+                keyboardType: TextInputType.emailAddress,
+              ),
+              const SizedBox(height: 20),
+              imagenSeleccionada != null
+                  ? Image.file(imagenSeleccionada!, height: 150)
+                  : const Text('No se ha seleccionado ninguna imagen'),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () => seleccionarImagen(ImageSource.gallery),
+                child: const Text('Seleccionar Imagen de la Galería'),
+              ),
+              ElevatedButton(
+                onPressed: () => seleccionarImagen(ImageSource.camera),
+                child: const Text('Tomar Foto con la Cámara'),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () async {
+                  await actualizarDatosUsuario();
+                },
+                child: const Text('Guardar Cambios'),
+              ),
+            ],
+          ),
         ),
       ),
     );

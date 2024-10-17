@@ -56,23 +56,25 @@ class Estado extends State<Registro> {
         fechaNacimiento = fechaSeleccionada;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(_esMayorDeEdad(fechaSeleccionada) 
-          ? 'Eres mayor de edad' 
-          : 'No eres mayor de edad')),
+        SnackBar(
+            content: Text(_esMayorDeEdad(fechaSeleccionada)
+                ? 'Eres mayor de edad'
+                : 'No eres mayor de edad')),
       );
     }
   }
 
   bool _esMayorDeEdad(DateTime fecha) {
     return DateTime.now().year - fecha.year > 18 ||
-      (DateTime.now().year - fecha.year == 18 && 
-       DateTime.now().isAfter(DateTime(fecha.year, fecha.month, fecha.day)));
+        (DateTime.now().year - fecha.year == 18 &&
+            DateTime.now()
+                .isAfter(DateTime(fecha.year, fecha.month, fecha.day)));
   }
 
   Future<void> registrarCorreo() async {
     setState(() => cargando = true);
 
-    if (_email.text.isEmpty || 
+    if (_email.text.isEmpty ||
         !RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(_email.text)) {
       _mostrarSnackBar('Por favor, ingrese un correo electrónico válido');
       setState(() => cargando = false);
@@ -86,7 +88,8 @@ class Estado extends State<Registro> {
     }
 
     try {
-      UserCredential credencial = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      UserCredential credencial =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: _email.text,
         password: _contrasena.text,
       );
@@ -94,10 +97,14 @@ class Estado extends State<Registro> {
       // Subir imagen de perfil a Firebase Storage si se ha seleccionado
       String imagenUrl = '';
       if (imagenPerfil != null) {
-        imagenUrl = await _subirImagen(imagenPerfil!); // Lógica para subir la imagen
+        imagenUrl =
+            await _subirImagen(imagenPerfil!); // Lógica para subir la imagen
       }
 
-      await FirebaseFirestore.instance.collection('usuarios').doc(credencial.user!.uid).set({
+      await FirebaseFirestore.instance
+          .collection('usuarios')
+          .doc(credencial.user!.uid)
+          .set({
         'imagenPerfil': imagenUrl,
         'nombre': _nombre.text,
         'apellido': _apellido.text,
@@ -136,7 +143,8 @@ class Estado extends State<Registro> {
 
   Future<String> _subirImagen(File imagen) async {
     String nombreImagen = DateTime.now().millisecondsSinceEpoch.toString();
-    Reference ref = FirebaseStorage.instance.ref().child('imagenes_perfil/$nombreImagen');
+    Reference ref =
+        FirebaseStorage.instance.ref().child('imagenes_perfil/$nombreImagen');
     UploadTask uploadTask = ref.putFile(imagen);
     TaskSnapshot snapshot = await uploadTask;
     return await snapshot.ref.getDownloadURL();
@@ -148,7 +156,8 @@ class Estado extends State<Registro> {
   }
 
   void _mostrarSnackBar(String mensaje) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(mensaje)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(mensaje)));
   }
 
   void _manejarErrores(FirebaseAuthException e) {
@@ -165,18 +174,19 @@ class Estado extends State<Registro> {
   }
 
   bool _camposValidos() {
-    return _email.text.isNotEmpty && 
-           _nombre.text.isNotEmpty && 
-           _apellido.text.isNotEmpty && 
-           _nombreUsuario.text.isNotEmpty && 
-           _contrasena.text.isNotEmpty && 
-           _contraseniaConfirmada.text.isNotEmpty && 
-           fechaNacimiento != null;
+    return _email.text.isNotEmpty &&
+        _nombre.text.isNotEmpty &&
+        _apellido.text.isNotEmpty &&
+        _nombreUsuario.text.isNotEmpty &&
+        _contrasena.text.isNotEmpty &&
+        _contraseniaConfirmada.text.isNotEmpty &&
+        fechaNacimiento != null;
   }
 
   Future<void> _seleccionarImagen() async {
     final ImagePicker picker = ImagePicker();
-    final XFile? seleccion = await picker.pickImage(source: ImageSource.gallery);
+    final XFile? seleccion =
+        await picker.pickImage(source: ImageSource.gallery);
     if (seleccion != null) {
       setState(() {
         imagenPerfil = File(seleccion.path);
@@ -200,19 +210,25 @@ class Estado extends State<Registro> {
 
   Widget _buildPrimeraPantalla() {
     return _buildContainerColumn([
-      const Text('Correo electrónico y contraseña', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+      const Text('Ingresa tu nombre y apellido',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
       const SizedBox(height: 20),
       CustomTextfield(hintText: 'Email', controller: _email),
       const SizedBox(height: 20),
-      CustomTextfield(hintText: 'Contraseña', controller: _contrasena, obscureText: true),
+      CustomTextfield(
+          hintText: 'Contraseña', controller: _contrasena, obscureText: true),
       const SizedBox(height: 20),
-      CustomTextfield(hintText: 'Confirmar contraseña', controller: _contraseniaConfirmada, obscureText: true),
+      CustomTextfield(
+          hintText: 'Confirmar contraseña',
+          controller: _contraseniaConfirmada,
+          obscureText: true),
     ]);
   }
 
   Widget _buildSegundaPantalla() {
     return _buildContainerColumn([
-      const Text('Nombre y Apellido', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+      const Text('Nombre y Apellido',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
       const SizedBox(height: 20),
       CustomTextfield(hintText: 'Nombre', controller: _nombre),
       const SizedBox(height: 20),
@@ -222,9 +238,11 @@ class Estado extends State<Registro> {
 
   Widget _buildTerceraPantalla() {
     return _buildContainerColumn([
-      const Text('Fecha de Nacimiento y Nombre de Usuario', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+      const Text('Fecha de Nacimiento y Nombre de Usuario',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
       const SizedBox(height: 20),
-      CustomTextfield(hintText: 'Nombre de usuario', controller: _nombreUsuario),
+      CustomTextfield(
+          hintText: 'Nombre de usuario', controller: _nombreUsuario),
       const SizedBox(height: 20),
       ElevatedButton(
         onPressed: () => _seleccionarFecha(context),
@@ -232,11 +250,12 @@ class Estado extends State<Registro> {
           backgroundColor: const Color(0xff00796B),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         ),
-        child: Text(fechaNacimiento == null 
-          ? 'Selecciona tú fecha de nacimiento' 
-          : 'Fecha de nacimiento: ${fechaNacimiento!.day}/${fechaNacimiento!.month}/${fechaNacimiento!.year}', style: TextStyle(
-            color: Colors.black
-          ),),
+        child: Text(
+          fechaNacimiento == null
+              ? 'Selecciona tú fecha de nacimiento'
+              : 'Fecha de nacimiento: ${fechaNacimiento!.day}/${fechaNacimiento!.month}/${fechaNacimiento!.year}',
+          style: TextStyle(color: Colors.black),
+        ),
       ),
       const SizedBox(height: 20),
       ElevatedButton(
@@ -245,11 +264,14 @@ class Estado extends State<Registro> {
           backgroundColor: const Color(0xff00796B),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         ),
-        child: Text(imagenPerfil == null 
-          ? 'Selecciona tu imagen de perfil' 
-          : 'Imagen de perfil seleccionada', style: TextStyle(
+        child: Text(
+          imagenPerfil == null
+              ? 'Selecciona tu imagen de perfil'
+              : 'Imagen de perfil seleccionada',
+          style: TextStyle(
             color: Colors.black,
-          ),),
+          ),
+        ),
       ),
       const SizedBox(height: 20),
       ElevatedButton(
@@ -258,11 +280,13 @@ class Estado extends State<Registro> {
           padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
         ),
         onPressed: _camposValidos() && !cargando ? registrarCorreo : null,
-        child: cargando 
-          ? const CircularProgressIndicator(color: Colors.white) 
-          : const Text('Registrar', style: TextStyle(
-            color: Colors.white
-          ),),
+        child: cargando
+            ? const CircularProgressIndicator(
+                color: Color.fromARGB(255, 203, 40, 40))
+            : const Text(
+                'Registrar',
+                style: TextStyle(color: Colors.white),
+              ),
       ),
     ]);
   }

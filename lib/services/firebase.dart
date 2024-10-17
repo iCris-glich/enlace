@@ -4,12 +4,10 @@ import 'package:logger/logger.dart';
 
 final Logger logger = Logger();
 
-Future <void> sesion (String email, String contrasenia) async {
+Future<void> sesion(String email, String contrasenia) async {
   try {
-    await FirebaseAuth.instance.signInWithEmailAndPassword(
-    email: email, 
-    password: contrasenia
-    );
+    await FirebaseAuth.instance
+        .signInWithEmailAndPassword(email: email, password: contrasenia);
     logger.i('Sesion iniciada con exito');
   } catch (e) {
     logger.e('Error $e al iniciar sesion');
@@ -26,7 +24,8 @@ Future<UserCredential?> google() async {
       return null;
     }
 
-    final GoogleSignInAuthentication googleAutenticado = await googleUsuario.authentication;
+    final GoogleSignInAuthentication googleAutenticado =
+        await googleUsuario.authentication;
 
     final credential = GoogleAuthProvider.credential(
       accessToken: googleAutenticado.accessToken,
@@ -34,7 +33,8 @@ Future<UserCredential?> google() async {
     );
 
     // Iniciar sesión en Firebase con las credenciales de Google
-    final UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+    final UserCredential userCredential =
+        await FirebaseAuth.instance.signInWithCredential(credential);
 
     // Obtener el usuario y su UID
     final User? usuario = userCredential.user;

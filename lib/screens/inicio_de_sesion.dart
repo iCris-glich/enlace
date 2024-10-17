@@ -129,7 +129,7 @@ class Estado extends State <InicioDeSesion> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Image.network('https://cdn4.iconfinder.com/data/icons/logos-brands-7/512/google_logo-google_icongoogle-512.png', width: 1, height: 1,),
+                  Image.network('https://cdn4.iconfinder.com/data/icons/logos-brands-7/512/google_logo-google_icongoogle-512.png', width: 50, height: 30,),
                   const Text('Iniciar con Google', style: TextStyle(
                     color: Colors.black
                    ),

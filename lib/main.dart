@@ -7,7 +7,7 @@ import 'package:timeago/timeago.dart' as timeago;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Manejo de errores al inicializar Firebase
   try {
     await Firebase.initializeApp(

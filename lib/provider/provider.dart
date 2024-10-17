@@ -26,7 +26,7 @@ class Publicacion {
     return Publicacion(
       documentId: doc.id,
       texto: data['texto'] ?? '',
-      imagen: data['imagen'],  // Asignar directamente, puede ser null
+      imagen: data['imagen'], // Asignar directamente, puede ser null
       fechaDePublicacion: data['fechaDePublicacion'] ?? Timestamp.now(),
       nombreDelUsuario: data['nombreDelUsuario'] ?? 'Usuario desconocido',
       likes: data['likes'] ?? 0,
@@ -46,10 +46,7 @@ class Publicacion {
     };
   }
 
- String getTiempoTranscurrido() {
+  String getTiempoTranscurrido() {
     return timeago.format(fechaDePublicacion.toDate(), locale: 'es');
   }
 }
-
-
-

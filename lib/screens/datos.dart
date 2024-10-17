@@ -28,21 +28,29 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
   }
 
   Future<void> obtenerDatosUsuario() async {
-    usuario = FirebaseAuth.instance.currentUser;
+    try {
+      usuario = FirebaseAuth.instance.currentUser;
 
-    if (usuario != null) {
-      DocumentSnapshot userDoc =
-          await FirebaseFirestore.instance.collection('usuarios').doc(usuario!.uid).get();
+      if (usuario != null) {
+        DocumentSnapshot userDoc = await FirebaseFirestore.instance
+            .collection('usuarios')
+            .doc(usuario!.uid)
+            .get();
 
-      if (userDoc.exists) {
-        setState(() {
-          nombre = userDoc['nombre'] ?? '';
-          apellido = userDoc['apellido'] ?? '';
-          nombreUsuario = userDoc['nombreUsuario'] ?? '';
-          email = userDoc['email'] ?? '';
-          imagenUrl = userDoc['imagenPerfil'] ?? imagenUrl; // Obtener la URL de la imagen
-        });
+        if (userDoc.exists) {
+          setState(() {
+            nombre = userDoc['nombre'] ?? '';
+            apellido = userDoc['apellido'] ?? '';
+            nombreUsuario = userDoc['nombreUsuario'] ?? '';
+            email = userDoc['email'] ?? '';
+            imagenUrl = userDoc['imagenPerfil'] ??
+                imagenUrl; // Obtener la URL de la imagen
+          });
+        }
       }
+    } catch (e) {
+      Logger().e('Error al obtener los datos del usuario: $e');
+      // Puedes mostrar un mensaje de error o notificar al usuario
     }
   }
 
@@ -52,80 +60,92 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
       appBar: AppBar(
         title: const Text('Perfil de Usuario'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Datos del Usuario',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 20),
-            Card(
-              elevation: 4,
-              child: Container(
-                alignment: Alignment.center,
-                padding: const EdgeInsets.all(15.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    ClipOval(
-                      child: Image.network(
-                        imagenUrl,
-                        width: 60,
-                        height: 60,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          // En caso de error, muestra una imagen por defecto
-                          return Image.network(
-                            'https://images.vexels.com/media/users/3/137047/isolated/preview/5831a17a290077c646a48c4db78a81bb-icono-de-perfil-de-usuario-azul.png',
-                            width: 60,
-                            height: 60,
-                            fit: BoxFit.cover,
-                          );
-                        },
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Stack(
+                alignment: Alignment.bottomCenter,
+                children: [
+                  // Banner Image con manejo de errores
+                  Image.network(
+                    'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQjy1E10RfX3Tvb4E1aFOXOE1vQ1YaE-andnw&s',
+                    width: double.infinity,
+                    height: 200,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Icon(Icons.error,
+                          size: 100, color: Colors.red);
+                    },
+                  ),
+                  // Profile Picture con manejo de errores
+                  Positioned(
+                    bottom: -50,
+                    child: CircleAvatar(
+                      radius: 60,
+                      child: ClipOval(
+                        child: FadeInImage.assetNetwork(
+                          placeholder: 'assets/images/perfil.jpg',
+                          image: imagenUrl,
+                          fit: BoxFit.cover,
+                          width: 120,
+                          height: 120,
+                          imageErrorBuilder: (context, error, stackTrace) {
+                            return const Icon(Icons.error,
+                                size: 100, color: Colors.red);
+                          },
+                        ),
                       ),
                     ),
-                    Text(
-                      'Nombre: $nombre',
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                  ),
+                  // Edit Icon
+                  Positioned(
+                    right: 110,
+                    child: InkWell(
+                      onTap: () async {
+                        try {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const Editar()),
+                          );
+                        } catch (e) {
+                          Logger().e(
+                              'Error al navegar a la pantalla de edición: $e');
+                          // Manejo de errores en la navegación
+                        }
+                      },
+                      child: const CircleAvatar(
+                        radius: 20,
+                        backgroundColor: Colors.blueAccent,
+                        child: Icon(Icons.camera_alt, color: Colors.white),
+                      ),
                     ),
-                    const SizedBox(height: 10),
-                    Text(
-                      'Apellido: $apellido',
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      'Nombre de Usuario: $nombreUsuario',
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      'Email: $email',
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 30),
-            Center(
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const Editar()), // Navegar a la pantalla de edición
-                  );
-                },
-                child: const Text('Editar Datos'),
+              const SizedBox(height: 80), // Space for profile picture
+              // User Info
+              Text(
+                nombre,
+                style:
+                    const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
-            ),
-          ],
+              const SizedBox(height: 10),
+              Text(
+                apellido,
+                style: const TextStyle(fontSize: 18, color: Colors.grey),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                nombreUsuario,
+                style: const TextStyle(fontSize: 16, color: Colors.blueGrey),
+              ),
+              const SizedBox(height: 30),
+            ],
+          ),
         ),
       ),
     );
