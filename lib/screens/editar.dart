@@ -1,11 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
+import 'package:logger/logger.dart';
+
 class Editar extends StatefulWidget {
-  const Editar({Key? key}) : super(key: key);
+  const Editar({super.key});
 
   @override
   _EditarState createState() => _EditarState();
@@ -28,6 +31,26 @@ class _EditarState extends State<Editar> {
     obtenerDatosUsuario();
   }
 
+  Future<String> subirImagenAStorage(File imagen) async {
+    try {
+      String usuarioId = usuario!.uid;
+      Reference storageRef = FirebaseStorage.instance
+          .ref()
+          .child('imagenes_perfil')
+          .child('$usuarioId.jpg');
+
+      UploadTask cargar = storageRef.putFile(imagen);
+      TaskSnapshot taskSnapshot = await cargar.whenComplete(() => null);
+
+      String downloadUrl = await taskSnapshot.ref.getDownloadURL();
+
+      return downloadUrl;
+    } catch (e) {
+      Logger().e('Error al subir la imagen: $e');
+      throw 'No se pudo cargar la imagen';
+    }
+  }
+
   Future<void> obtenerDatosUsuario() async {
     usuario = FirebaseAuth.instance.currentUser;
 
@@ -39,7 +62,9 @@ class _EditarState extends State<Editar> {
 
       if (userDoc.exists) {
         setState(() {
-          nombreController.text = userDoc['nombreUsuario'] ?? '';
+          nombreController.text = userDoc['nombre'] ?? '';
+          apellidoController.text = userDoc['apellido'];
+          usuarioController.text = userDoc['nombreUsuario'];
           emailController.text = userDoc['email'] ?? '';
         });
       }
@@ -49,10 +74,8 @@ class _EditarState extends State<Editar> {
   Future<void> actualizarDatosUsuario() async {
     if (usuario != null) {
       try {
-        // Asumiendo que tienes un método para subir la imagen a Firebase Storage y obtener la URL
         String? urlImagen;
         if (imagenSeleccionada != null) {
-          // Subir la imagen a Firebase Storage y obtener la URL
           urlImagen = await subirImagenAStorage(imagenSeleccionada!);
         }
 
@@ -67,8 +90,8 @@ class _EditarState extends State<Editar> {
               .doc(usuario!.uid)
               .update({
             'nombre': nombreController.text,
-            'apellido': apellidoController.text, // Añadido
-            'nombreUsuario': usuarioController.text, // Añadido
+            'apellido': apellidoController.text,
+            'nombreUsuario': usuarioController.text,
             'email': emailController.text,
             'imagenPerfil': urlImagen ?? '', // Actualizar la URL de la imagen
           });
@@ -82,8 +105,8 @@ class _EditarState extends State<Editar> {
               .doc(usuario!.uid)
               .set({
             'nombre': nombreController.text,
-            'apellido': apellidoController.text, // Añadido
-            'nombreUsuario': usuarioController.text, // Añadido
+            'apellido': apellidoController.text,
+            'nombreUsuario': usuarioController.text,
             'email': emailController.text,
             'imagenPerfil': urlImagen ?? '',
           });
@@ -98,13 +121,6 @@ class _EditarState extends State<Editar> {
         );
       }
     }
-  }
-
-  // Función para subir imagen a Firebase Storage
-  Future<String> subirImagenAStorage(File imagen) async {
-    // Aquí subirías la imagen a Firebase Storage y obtendrías la URL
-    // Debes implementar esta función para manejar la subida y obtener el enlace
-    return 'URL_DE_LA_IMAGEN_SUBIDA';
   }
 
   Future<void> seleccionarImagen(ImageSource source) async {
